@@ -68,71 +68,82 @@ def stupid_shit_doit():
     #This stuff is a little uncertain for me - Scott made this from ThingSpeak tutorials
     #The gist of it is the params encodes values to field no's and these get sent to the channel.
 
-    data_from_website = urllib.request.urlopen("https://api.thingspeak.com/channels/732724/fields/5.json?results=2")
-    s = str(data_from_website.read())
-    print(s[-8:-5])
-    print(data_from_website)
-    print(type(data_from_website))
-    data_from_website.close() 
+    data_from_website = urllib.request.urlopen("https://api.thingspeak.com/channels/765151/feeds.json?api_key=FIUXZKBYUVOANBDU&results=2")
+    
+    s = str(data_from_website.read()).split(',')
+    print(s)
+    print(s[-1])
+    print(s[-2])
+    print(s[-3])
+    whitelist = set(',abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
+    
+
+    threshold = ''.join(filter(whitelist.__contains__, s[-1].split(':')[-1]))
+    tag = ''.join(filter(whitelist.__contains__, s[-2].split(':')[-1]))
+    address = ''.join(filter(whitelist.__contains__, s[-3].split(':')[-1]))
+
+    print(threshold)
+    print(tag)
+    print(address)
+
+    # #new string has a list with all the fields and their data
+    # #its all in string types because that was the easiest way to cut it up/edit it, etc.
+    # #new_string has the field<no>: still - needs to be removed before converting to hex
 
 
-    #This block removes all the unneccesary parts of the ThingSpeak json file.
-    #Note: by splitting after entry_id:1, an error will occur if there are more than 
-    #one entry. Please edit when pulling data for django server.
-    print(type(s))
-    j = s.split("\"entry_id\":1,")[1]
-    #str_field0 = j.split("field1\":\"")[1]
-    str_field1 = j.split("}")[0] #str_field0.split("}")[0]
-    print(j)
-    new_string = str_field1.replace("\"","")
-    new_string_list = new_string.split(',')
-    print(new_string_list)
-
-    #new string has a list with all the fields and their data
-    #its all in string types because that was the easiest way to cut it up/edit it, etc.
-    #new_string has the field<no>: still - needs to be removed before converting to hex
 
     #messageID
-    messID_string = new_string_list[0].replace("field1:","")
-    messID_hold = Message_Dictionary[messID_string]
+
+
+
+    # messID_string = new_string_list[0].replace("field1:","")
+    messID_hold = Message_Dictionary['TUP']
     messID = "0x{:02x}".format(messID_hold)
-    print(messID_string)
+    # print(messID_string)
     print(messID)
 
 
     #Planter Address
-    PA_string = new_string_list[1].replace("field2:","")
-    PA = "0x{:02x}".format(int(PA_string))
-    print(PA_string)
+    # PA_string = new_string_list[1].replace("field2:","")
+    PA = "0x{:02x}".format(int(address))
+    # print(PA_string)
     print(PA)
 
-    #Tag
-    Tag_string = new_string_list[2].replace("field3:","")
-    Tag_hold = Tag_Dictionary[Tag_string]
+    # #Tag
+    # Tag_string = new_string_list[2].replace("field3:","")
+    Tag_hold = Tag_Dictionary[tag]
     Tag = "0x{:02x}".format(int(Tag_hold))
-    print(Tag_string)
+    # print(Tag_string)
     print(Tag)
-    print(type(Tag))
+    # print(type(Tag))
 
-    #Value
-    Value_string = new_string_list[3].replace("field4:","")
-    f = float(Value_string)
+    # #Value
+    # Value_string = new_string_list[3].replace("field4:","")
+    f = float(threshold)
     Value = hex(struct.unpack('<Q', struct.pack('<d', f))[0])
-    print(Value_string)
+    # print(Value_string)
     print(Value)
     print(type(Value))
 
-    #format(int(hex_input1[34:36],16),'02')
+    full_hex_string = messID+PA+Tag+Value
+    print(full_hex_string)
 
-    Message_str = messID+PA[2:4]+Tag[2:4]+Value[2:]
-    print(Message_str)
-    print(type(Message_str))
+    nox = set('0123456789')
+    clean_string =  full_hex_string.replace("0x","") # ''.join(filter(nox.__contains__, full_hex_string))
+    print(clean_string)
 
-    #After a bunch of fun gymnastics, I made the string back into an int type (which using hex() can be read in hex notation)
-    #This int data type is what we should expect from the controller (i.e. a number, not a string)
-    Message = int(Message_str,16)
-    print(hex(Message))
-    print(type(Message))
+
+    # #format(int(hex_input1[34:36],16),'02')
+
+    # Message_str = messID+PA[2:4]+Tag[2:4]+Value[2:]
+    # print(Message_str)
+    # print(type(Message_str))
+
+    # #After a bunch of fun gymnastics, I made the string back into an int type (which using hex() can be read in hex notation)
+    # #This int data type is what we should expect from the controller (i.e. a number, not a string)
+    # Message = int(Message_str,16)
+    # print(hex(Message))
+    # print(type(Message))
 
 
 stupid_shit_doit()
