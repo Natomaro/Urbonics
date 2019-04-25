@@ -29,7 +29,7 @@ from keras.models import model_from_json
 #print(cancer.target)
 
 df = pd.read_csv('fake_set.csv')
-target = pd.read_csv('target_tag.csv')
+target = pd.read_csv('fs_target_tag.csv')
 
 X_train, X_test, y_train, y_test = train_test_split(df, target, test_size=0.4,random_state=109) # 70% training and 30% test
 
